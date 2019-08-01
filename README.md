@@ -26,4 +26,12 @@ Google search opencv scan document, you can find several related tutorials, the 
 Several neural network algorithms tried in the past can't get the desired effect. Later, I changed the idea. Since the traditional technical means contains two key steps, can we use neural network to improve these two separately? Steps, after analysis, we can try to replace the canny algorithm with neural network, that is, use neural network to detect the edge of the rectangular region in the image. As long as this edge detection can remove more interference factors, the second step The algorithm inside can be made simpler.
 
 ## Neural network input and output
+![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/2.png)
 
+According to this idea, for the neural network part, the current demand becomes the same as shown in the above figure.
+
+## HED (Holistically-Nested Edge Detection) network
+
+The need for edge detection, in the field of image processing, commonly called Edge Detection or Contour Detection, follows this idea and finds the Holistically-Nested Edge Detection network model.
+
+The HED network model is designed based on the VGG16 network structure, so it is necessary to look at VGG16 first.
