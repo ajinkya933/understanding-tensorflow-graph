@@ -8,11 +8,8 @@ a key technical point for running a neural network on a mobile client through a 
 - Although this article is not an introductory tutorial on neural networking techniques, it will still provide a series of links to relevant introductory tutorials and technical documentation to help you understand the content of this article.
 - The specific neural network algorithm used is only one component of this paper. In addition, this paper also introduces how to tailor the TensorFlow static library to run on the mobile phone, how to prepare training sample pictures, and various kinds of training neural networks. Skills, etc.
 
+## Use Case
 
 ![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/image1.png)
 
-
-
-
-
-> The requirements are easy to describe clearly, as shown above, in a picture, the coordinates of the four vertices of a rectangular-shaped document are found.
+- The requirements are easy to describe clearly, as shown above, in a picture, the coordinates of the four vertices of a rectangular-shaped document are found.
