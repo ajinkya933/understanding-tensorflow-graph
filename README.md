@@ -124,5 +124,39 @@ def hed_net(inputs, batch_size):
 
 ```
 
+### Training network
+## Cost function
+
+The HED network given in the paper is a general edge detection network. According to the description of the paper, the image obtained at each scale needs to participate in the calculation of cost. The code of this part is as follows:
+
+```
+input_queue_for_train = tf.train.string_input_producer([FLAGS.csv_path])
+image_tensor, annotation_tensor = input_image_pipeline(dataset_root_dir_string, input_queue_for_train, FLAGS.batch_size)
+
+dsn_fuse, dsn1, dsn2, dsn3, dsn4, dsn5 = hed_net(image_tensor, FLAGS.batch_size)
+
+cost = class_balanced_sigmoid_cross_entropy(dsn_fuse, annotation_tensor) + \
+       class_balanced_sigmoid_cross_entropy(dsn1, annotation_tensor) + \
+       class_balanced_sigmoid_cross_entropy(dsn2, annotation_tensor) + \
+       class_balanced_sigmoid_cross_entropy(dsn3, annotation_tensor) + \
+       class_balanced_sigmoid_cross_entropy(dsn4, annotation_tensor) + \
+       class_balanced_sigmoid_cross_entropy(dsn5, annotation_tensor)
+  ```
+  
+  In the network trained in this way, the detected edge line is a bit thick. In order to get a finer edge line, an optimization scheme is found through multiple experiments. The code is as follows:
+  
+  ```
+input_queue_for_train = tf.train.string_input_producer([FLAGS.csv_path])
+image_tensor, annotation_tensor = input_image_pipeline(dataset_root_dir_string, input_queue_for_train, FLAGS.batch_size)
+
+dsn_fuse, _, _, _, _, _ = hed_net(image_tensor, FLAGS.batch_size)
+
+cost = class_balanced_sigmoid_cross_entropy(dsn_fuse, annotation_tensor)
+  ```
+That is to say, the image obtained at each scale is no longer involved in the calculation of cost, and only the final image obtained after fusion is used for calculation.
+
+
+### The effect of the two cost functions is shown in the following figure. The right side is the optimized effect:
+
 
 
