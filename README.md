@@ -35,3 +35,19 @@ According to this idea, for the neural network part, the current demand becomes 
 The need for edge detection, in the field of image processing, commonly called Edge Detection or Contour Detection, follows this idea and finds the Holistically-Nested Edge Detection network model.
 
 The HED network model is designed based on the VGG16 network structure, so it is necessary to look at VGG16 first.
+
+![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/3.png)
+
+The figure above is the schematic diagram of VGG16. In order to facilitate the transition from VGG16 to HED, we first turn VGG16 into the following diagram:
+
+![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/4.png)
+
+In the above diagram, the different components of VGG16 are distinguished by different colors.
+
+![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/5.png)
+
+As can be seen from the schematic diagram, the convolutional layer represented by green and the pooled layer represented by red can be clearly divided into five groups. The third group is shown in the above figure with a purple line.
+
+![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/6.png)
+
+The HED network uses the five groups in the VGG16 network. The fully connected layer and the softmax layer in the latter part are not required. In addition, the pooling layer (red) of the fifth group is not required.
