@@ -51,3 +51,78 @@ As can be seen from the schematic diagram, the convolutional layer represented b
 ![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/6.png)
 
 The HED network uses the five groups in the VGG16 network. The fully connected layer and the softmax layer in the latter part are not required. In addition, the pooling layer (red) of the fifth group is not required.
+
+![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/7.png)
+
+After removing the unnecessary parts, you get the network structure like the above picture. Because of the role of the pooling layer, starting from the second group, the length and width of the input image of each group are the input images of the previous group. Half the length and width.
+
+![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/8.png)
+
+The HED network is a multi-scale and multi-level feature learning network structure. The so-called multi-scale is the last convolution layer (green part) of each group of VGG16 as shown in the above figure. The output of the image is taken out, because the length and width of the image obtained by each group are different, so you need to use transposed convolution/deconvolution (deconv) for each group of images. Doing a calculation, in effect, is equivalent to expanding the length and width of the image obtained in the second to fifth groups by 2 to 16 times, so that the image obtained on each scale (each group of VGG16 is a scale) They are all the same size.
+
+![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/9.png)
+
+Combine the same size images obtained on each scale, and get the final output image, which is the image with edge detection.
+
+## The HED network structure code written based on TensorFlow is as follows:
+```
+def hed_net(inputs, batch_size):
+    # ref https://github.com/s9xie/hed/blob/master/examples/hed/train_val.prototxt
+    with tf.variable_scope('hed', 'hed', [inputs]):
+        with slim.arg_scope([slim.conv2d, slim.fully_connected],
+                        activation_fn=tf.nn.relu,
+                        weights_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                        weights_regularizer=slim.l2_regularizer(0.0005)):
+            # vgg16 conv && max_pool layers
+            net = slim.repeat(inputs, 2, slim.conv2d, 12, [3, 3], scope='conv1')
+            dsn1 = net
+            net = slim.max_pool2d(net, [2, 2], scope='pool1')
+
+            net = slim.repeat(net, 2, slim.conv2d, 24, [3, 3], scope='conv2')
+            dsn2 = net
+            net = slim.max_pool2d(net, [2, 2], scope='pool2')
+
+            net = slim.repeat(net, 3, slim.conv2d, 48, [3, 3], scope='conv3')
+            dsn3 = net
+            net = slim.max_pool2d(net, [2, 2], scope='pool3')
+
+            net = slim.repeat(net, 3, slim.conv2d, 96, [3, 3], scope='conv4')
+            dsn4 = net
+            net = slim.max_pool2d(net, [2, 2], scope='pool4')
+
+            net = slim.repeat(net, 3, slim.conv2d, 192, [3, 3], scope='conv5')
+            dsn5 = net
+            # net = slim.max_pool2d(net, [2, 2], scope='pool5') # no need this pool layer
+
+            # dsn layers
+            dsn1 = slim.conv2d(dsn1, 1, [1, 1], scope='dsn1')
+            # no need deconv for dsn1
+
+            dsn2 = slim.conv2d(dsn2, 1, [1, 1], scope='dsn2')
+            deconv_shape = tf.pack([batch_size, const.image_height, const.image_width, 1])
+            dsn2 = deconv_mobile_version(dsn2, 2, deconv_shape) # deconv_mobile_version can work on mobile
+
+            dsn3 = slim.conv2d(dsn3, 1, [1, 1], scope='dsn3')
+            deconv_shape = tf.pack([batch_size, const.image_height, const.image_width, 1])
+            dsn3 = deconv_mobile_version(dsn3, 4, deconv_shape)
+
+            dsn4 = slim.conv2d(dsn4, 1, [1, 1], scope='dsn4')
+            deconv_shape = tf.pack([batch_size, const.image_height, const.image_width, 1])
+            dsn4 = deconv_mobile_version(dsn4, 8, deconv_shape)
+
+            dsn5 = slim.conv2d(dsn5, 1, [1, 1], scope='dsn5')
+            deconv_shape = tf.pack([batch_size, const.image_height, const.image_width, 1])
+            dsn5 = deconv_mobile_version(dsn5, 16, deconv_shape)
+
+            # dsn fuse
+            dsn_fuse = tf.concat(3, [dsn1, dsn2, dsn3, dsn4, dsn5])
+            dsn_fuse = tf.reshape(dsn_fuse, [batch_size, const.image_height, const.image_width, 5]) #without this, will get error: ValueError: Number of in_channels must be known.
+
+            dsn_fuse = slim.conv2d(dsn_fuse, 1, [1, 1], scope='dsn_fuse')
+
+    return dsn_fuse, dsn1, dsn2, dsn3, dsn4, dsn5
+
+```
+
+
+
