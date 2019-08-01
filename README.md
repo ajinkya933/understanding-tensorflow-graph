@@ -9,7 +9,7 @@ a key technical point for running a neural network on a mobile client through a 
 - The specific neural network algorithm used is only one component of this paper. In addition, this paper also introduces how to tailor the TensorFlow static library to run on the mobile phone, how to prepare training sample pictures, and various kinds of training neural networks. Skills, etc.
 
 
-![alt text](http://url/to/img.png)
+![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/image1.png)
 
 
 
