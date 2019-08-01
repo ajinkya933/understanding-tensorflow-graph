@@ -158,5 +158,97 @@ That is to say, the image obtained at each scale is no longer involved in the ca
 
 ### The effect of the two cost functions is shown in the following figure. The right side is the optimized effect:
 
+![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/10.png)
+
+In addition, according to the requirements in the HED paper, when calculating the cost, you can not use the common variance cost, but should use the cost-sensitive loss function, the code is as follows:
+
+```
+def class_balanced_sigmoid_cross_entropy(logits, label, name='cross_entropy_loss'):
+    """
+    The class-balanced cross entropy loss,
+    as in `Holistically-Nested Edge Detection
+    <http://arxiv.org/abs/1504.06375>`_.
+    This is more numerically stable than class_balanced_cross_entropy
+
+    :param logits: size: the logits.
+    :param label: size: the ground truth in {0,1}, of the same shape as logits.
+    :returns: a scalar. class-balanced cross entropy loss
+    """
+    y = tf.cast(label, tf.float32)
+
+    count_neg = tf.reduce_sum(1. - y) # the number of 0 in y
+    count_pos = tf.reduce_sum(y) # the number of 1 in y (less than count_neg)
+    beta = count_neg / (count_neg + count_pos)
+
+    pos_weight = beta / (1 - beta)
+    cost = tf.nn.weighted_cross_entropy_with_logits(logits, y, pos_weight)
+    cost = tf.reduce_mean(cost * (1 - beta), name=name)
+
+    return cost
+```
+
+Bilinear initialization of transposed convolutional layers
+
+When trying the FCN network, it was stuck for a long time. According to the FCN requirements, when using transposed convolution/deconvolution (deconv), the convolution kernel should be used. The value is initialized to a bilinear upsampling kernel instead of the usual normal distribution random initialization, while using a small learning rate, which makes it easier to converge the model.
+
+In HED's paper, there is no explicit requirement to initialize the transposed convolution layer in this way. However, during the training process, it is found that the model is easier to converge when initialized in this way.
+
+The code for this part is as follows:
+
+```
+def get_kernel_size(factor):
+    """
+    Find the kernel size given the desired factor of upsampling.
+    """
+    return 2 * factor - factor % 2
+
+
+def upsample_filt(size):
+    """
+    Make a 2D bilinear kernel suitable for upsampling of the given (h, w) size.
+    """
+    factor = (size + 1) // 2
+    if size % 2 == 1:
+        center = factor - 1
+    else:
+        center = factor - 0.5
+    og = np.ogrid[:size, :size]
+    return (1 - abs(og[0] - center) / factor) * (1 - abs(og[1] - center) / factor)
+
+
+def bilinear_upsample_weights(factor, number_of_classes):
+    """
+    Create weights matrix for transposed convolution with bilinear filter
+    initialization.
+    """
+    filter_size = get_kernel_size(factor)
+    
+    weights = np.zeros((filter_size,
+                        filter_size,
+                        number_of_classes,
+                        number_of_classes), dtype=np.float32)
+    
+    upsample_kernel = upsample_filt(filter_size)
+    
+    for i in xrange(number_of_classes):
+        weights[:, :, i, i] = upsample_kernel
+    
+    return weights
+
+
+```
+Cold start of training process
+
+The HED network does not enter the convergence state as easily as the VGG network, and it is not easy to enter the desired ideal state, mainly for two reasons:
+
+    The bilinear initialization of the transposed convolutional layer mentioned above is an important factor because deconvolution is required on all four scales. If the deconvolution layer cannot converge, the entire HED will not enter the desired Ideal state
+    Another reason is caused by the multi-scale of HED. Since it is multi-scale, the image obtained on each scale should contribute to the final output image of the model. During the training process, if the size of the input image is It is 224*224, it is very easy to train successfully, but when the size of the input image is adjusted to 256*256, it is easy to have a situation, that is, the image obtained at 5 scales, there will be 1 ~ 2 images Is invalid (all black)
+
+In order to solve the problem encountered here, the method adopted is to train the network with a small number of sample pictures (such as 2000 sheets). In a short training time (such as 1000 iterations), if the HED network cannot show a convergence trend, or If you can't reach the full effective state of the image at 5 scales, then simply give up the training results of this round, restart the next round of training until you are satisfied, and then continue to train the network using the complete training sample set.
+
+### Training data set (large amount of synthetic data + small amount of real data)
+The training dataset used in the HED paper is for general edge detection purposes, and what shapes have edges, such as the following:
+
+
 
 
