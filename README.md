@@ -55,7 +55,7 @@ The HED network uses the five groups in the VGG16 network. The fully connected l
 
 ![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/7.png)
 
-After removing the unnecessary parts, you get the network structure like the above picture. Because of the role of the pooling layer, starting from the second group, the length and width of the input image of each group are the input images of the previous group. Half the length and width.
+After removing the unnecessary parts, you get the network structure like the above picture. Due to the pooling layer, starting from the second group, the length and width of the input image of each group = Half the length and width of the input images of the previous group. 
 
 ![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/8.png)
 
