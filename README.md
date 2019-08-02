@@ -427,7 +427,7 @@ Third-party communities and TensorFlow officials are aware of this problem, so i
 Although neural network technology has obtained a better edge detection effect than the canny algorithm, the neural network is not omnipotent, and the interference still exists. Therefore, the mathematical model algorithm in the second step is still What is needed is that because the edge detection in the first step has been greatly improved, the algorithm in the second step is appropriately simplified, and the overall adaptability of the algorithm is also stronger.
 
 The algorithm in this part is shown below:
-![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/14.png)
+![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/15.png)
 
 In numerical order, several key steps do the following:
 
