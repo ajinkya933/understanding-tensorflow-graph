@@ -188,7 +188,7 @@ def class_balanced_sigmoid_cross_entropy(logits, label, name='cross_entropy_loss
     return cost
 ```
 
-Bilinear initialization of transposed convolutional layers
+## Bilinear initialization of transposed convolutional layers
 
 When trying the FCN network, it was stuck for a long time. According to the FCN requirements, when using transposed convolution/deconvolution (deconv), the convolution kernel should be used. The value is initialized to a bilinear upsampling kernel instead of the usual normal distribution random initialization, while using a small learning rate, which makes it easier to converge the model.
 
@@ -238,7 +238,7 @@ def bilinear_upsample_weights(factor, number_of_classes):
 
 
 ```
-Cold start of training process
+## Cold start of training process
 
 The HED network does not enter the convergence state as easily as the VGG network, and it is not easy to enter the desired ideal state, mainly for two reasons:
 
