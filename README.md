@@ -250,7 +250,7 @@ In order to solve the problem encountered here, the method adopted is to train t
 ### Training data set (large amount of synthetic data + small amount of real data)
 The training dataset used in the HED paper is for general edge detection purposes, and what shapes have edges, such as the following:
 
-![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/11.png)
+![alt text](https://github.com/ajinkya933/understanding-tensorflow-graph/blob/master/11)
 
 
 
